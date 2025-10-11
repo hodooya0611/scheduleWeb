@@ -27,10 +27,20 @@ export default function Login() {
         };
 
         try {
-            await axios.post(`http://localhost:8080/api/auth/login/`, loginData);
-            console.error('로그인성공');
-        } catch (err) {
-            console.error('등록 실패', err);
+            const response = await axios.post(`http://localhost:8080/api/auth/login`, loginData);
+
+            const token = response.data.token;
+
+            // 토큰 저장 (브라우저 새로고침해도 유지)
+            localStorage.setItem('token', token);
+
+            navigate(`/`);
+        } catch (err: any) {
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                alert('아이디 또는 비밀번호가 틀렸습니다.');
+            } else {
+                alert('로그인 중 오류가 발생했습니다.');
+            }
         }
     };
 

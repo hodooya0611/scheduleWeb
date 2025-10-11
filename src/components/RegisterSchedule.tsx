@@ -20,10 +20,17 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 import { ScheduleRequest, ScheduleResponse, ScheduleForm, AlarmOption } from '../types/schedule';
 import { useNavigate, useLocation } from 'react-router-dom';
+import GoogleMapDialog from './GoogleMapDialog';
 
 export default function RegisterSchedule() {
+    const [open, setOpen] = useState(false);
+
+    const openGooleMap = () => setOpen(true);
+    const closeGooleMap = () => setOpen(false);
+
     const [scheduleForm, setScheduleForm] = useState<ScheduleForm>({
         title: '',
+        place: '',
         content: '',
         startDate: dayjs(),
         startTime: dayjs(),
@@ -54,6 +61,7 @@ export default function RegisterSchedule() {
                     const data = res.data;
                     setScheduleForm({
                         title: data.title,
+                        place: data.place,
                         content: data.content,
                         startDate: dayjs(data.startDate),
                         endDate: dayjs(data.endDate),
@@ -136,6 +144,13 @@ export default function RegisterSchedule() {
                     value={scheduleForm.title}
                     onChange={(e) => changeScheduleForm('title', e.target.value)}
                 />
+                <TextField label="장소" fullWidth multiline margin="normal" value={scheduleForm.place} />
+                <Button variant="outlined" onClick={openGooleMap}>
+                    지도에서 선택
+                </Button>
+
+                <GoogleMapDialog open={open} onClose={closeGooleMap} />
+
                 <Box display="flex" gap={2} mt={2} alignItems="center">
                     <DatePicker
                         label="시작일"

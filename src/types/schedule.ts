@@ -3,6 +3,7 @@ import { Dayjs } from 'dayjs';
 export interface ScheduleForm {
     title: string;
     content: string;
+    place: string;
     startDate: Dayjs | null;
     startTime: Dayjs | null;
     endDate: Dayjs | null;

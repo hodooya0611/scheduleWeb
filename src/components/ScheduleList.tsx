@@ -22,6 +22,13 @@ export default function ScheduleList() {
     const [selectedSchedule, setSelectedSchedule] = useState<any | null>(null);
     const [open, setOpen] = useState(false);
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+    }, []);
+
     // 달력 범위 내 일정 가져오기
     const fetchSchedules = async (start: Date, end: Date) => {
         try {
