@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+/// <reference types="google.maps" />
+import React, { useState, useRef, useEffect } from 'react';
 import {
     TextField,
     Box,
@@ -18,15 +18,18 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { ScheduleRequest, ScheduleResponse, ScheduleForm, AlarmOption } from '../types/schedule';
+import { ScheduleRequest, ScheduleForm } from '../types/schedule';
 import { useNavigate, useLocation } from 'react-router-dom';
-import GoogleMapDialog from './GoogleMapDialog';
+import { GoogleMap, useJsApiLoader, Libraries } from '@react-google-maps/api';
+
+const LIBRARIES: Libraries = ['places'];
 
 export default function RegisterSchedule() {
-    const [open, setOpen] = useState(false);
-
-    const openGooleMap = () => setOpen(true);
-    const closeGooleMap = () => setOpen(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const scheduleId = searchParams.get('id');
+    const mode = searchParams.get('mode') || 'create';
 
     const [scheduleForm, setScheduleForm] = useState<ScheduleForm>({
         title: '',
@@ -47,11 +50,43 @@ export default function RegisterSchedule() {
         setScheduleForm({ ...scheduleForm, [key]: value });
     };
 
-    const navigate = useNavigate();
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const scheduleId = searchParams.get('id');
-    const mode = searchParams.get('mode') || 'create';
+    const [selectedPlace, setSelectedPlace] = useState<{ name: string; lat: number; lng: number } | null>(null);
+
+    // Google Maps
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: 'AIzaSyCa50cdAmow5Tib8NLULmKPR8IAU9UM98Y',
+        libraries: LIBRARIES,
+        language: 'ko',
+    });
+
+    const mapRef = useRef<google.maps.Map | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+    const [center, setCenter] = useState({ lat: 35.681236, lng: 139.767125 }); // 도쿄역
+
+    useEffect(() => {
+        if (isLoaded && inputRef.current && !autocompleteRef.current) {
+            const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+                fields: ['geometry', 'name'],
+            });
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) return;
+
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+
+                setCenter({ lat, lng });
+                mapRef.current?.panTo({ lat, lng });
+
+                setSelectedPlace({ name: place.name || '', lat, lng });
+                changeScheduleForm('place', place.name || '');
+            });
+
+            autocompleteRef.current = autocomplete;
+        }
+    }, [isLoaded]);
 
     useEffect(() => {
         if (mode === 'view' && scheduleId) {
@@ -78,10 +113,6 @@ export default function RegisterSchedule() {
         }
     }, [mode, scheduleId]);
 
-    const clickCancel = () => {
-        navigate('/'); // 홈으로 이동
-    };
-
     const registerOrUpdateSchedule = async (e: React.FormEvent) => {
         e.preventDefault();
         const scheduleData: ScheduleRequest = {
@@ -102,41 +133,34 @@ export default function RegisterSchedule() {
 
         try {
             if (mode === 'view' && scheduleId) {
-                // 수정 모드
-                const response = await axios.post(
-                    `http://localhost:8080/api/schedules/update/${scheduleId}`,
-                    scheduleData
-                );
-                if (window.confirm('수정되었습니다. 홈으로 이동하시겠습니까?')) {
-                    navigate('/');
-                }
+                await axios.post(`http://localhost:8080/api/schedules/update/${scheduleId}`, scheduleData);
             } else {
-                // 등록 모드
-                const response = await axios.post('http://localhost:8080/api/schedules', scheduleData);
-                if (window.confirm('등록되었습니다. 홈으로 이동하시겠습니까?')) {
-                    navigate('/');
-                }
+                await axios.post('http://localhost:8080/api/schedules', scheduleData);
             }
+            navigate('/');
         } catch (err) {
             console.error('등록 실패', err);
         }
     };
+
+    if (!isLoaded) return <div>Loading Google Maps...</div>;
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <form
                 onSubmit={registerOrUpdateSchedule}
                 style={{
-                    width: '70%', // 화면 너비의 70%
-                    maxWidth: 800, // 너무 커지지 않게 제한
-                    minWidth: 400, // 너무 작아지면 보기 힘듦
-                    margin: '0 auto', // 좌우 가운데 정렬
-                    marginTop: '32px', // 위쪽 여백
+                    width: '70%',
+                    maxWidth: 800,
+                    minWidth: 400,
+                    margin: '0 auto',
+                    marginTop: '32px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '16px', // 요소 사이 간격
+                    gap: '16px',
                 }}
             >
+                {/* 제목 */}
                 <TextField
                     label="제목"
                     fullWidth
@@ -144,13 +168,28 @@ export default function RegisterSchedule() {
                     value={scheduleForm.title}
                     onChange={(e) => changeScheduleForm('title', e.target.value)}
                 />
-                <TextField label="장소" fullWidth multiline margin="normal" value={scheduleForm.place} />
-                <Button variant="outlined" onClick={openGooleMap}>
-                    지도에서 선택
-                </Button>
 
-                <GoogleMapDialog open={open} onClose={closeGooleMap} />
+                {/* 장소 검색 */}
+                <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="장소 검색"
+                    style={{ width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' }}
+                    value={scheduleForm.place}
+                    onChange={(e) => changeScheduleForm('place', e.target.value)}
+                />
 
+                {/* 지도 */}
+                <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '400px' }}
+                    center={center}
+                    zoom={16}
+                    onLoad={(map) => {
+                        mapRef.current = map;
+                    }}
+                />
+
+                {/* 날짜/시간/전체 일정 */}
                 <Box display="flex" gap={2} mt={2} alignItems="center">
                     <DatePicker
                         label="시작일"
@@ -194,6 +233,7 @@ export default function RegisterSchedule() {
                     />
                 </Box>
 
+                {/* 내용 */}
                 <TextField
                     label="내용"
                     fullWidth
@@ -204,6 +244,7 @@ export default function RegisterSchedule() {
                     onChange={(e) => changeScheduleForm('content', e.target.value)}
                 />
 
+                {/* 알람 설정 */}
                 <Box mt={2}>
                     <FormControlLabel
                         control={
@@ -254,11 +295,12 @@ export default function RegisterSchedule() {
                     )}
                 </Box>
 
+                {/* 저장/취소 버튼 */}
                 <Box mt={2} display="flex" justifyContent="flex-end" gap={2}>
                     <Button type="submit" variant="contained" color="primary">
                         저장하기
                     </Button>
-                    <Button type="button" variant="outlined" color="secondary" onClick={clickCancel}>
+                    <Button type="button" variant="outlined" color="secondary" onClick={() => navigate('/')}>
                         취소하기
                     </Button>
                 </Box>
