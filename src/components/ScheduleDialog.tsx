@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider, IconButton } from '@mui/material';
 import { BorderAll } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
 interface ScheduleDialogProps {
@@ -15,7 +15,7 @@ interface ScheduleDialogProps {
 export default function ScheduleDialog({ open, onClose, schedule, onDetail }: ScheduleDialogProps) {
     const handleDelete = async () => {
         try {
-            await axios.delete(`http://localhost:8080/api/schedules/${schedule.id}`);
+            await axiosInstance.delete(`/schedules/${schedule.id}`);
             alert('삭제되었습니다.');
             onClose();
         } catch (error) {

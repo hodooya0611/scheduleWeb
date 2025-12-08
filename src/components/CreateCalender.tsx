@@ -4,19 +4,17 @@ import { TextField, Box, Button, Typography, Divider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import axiosInstance from '../api/axiosInstance';
-import { MemberRequest, MemberResponse, MemberForm } from '../types/member';
+import { CalenderRequest, CalenderResponse, CalenderForm } from '../types/calender';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function RegisterMember() {
-    const [memberForm, setMemberForm] = useState<MemberForm>({
-        memberId: '',
-        password: '',
+export default function CreateCalender() {
+    const [calenderForm, setCalenderForm] = useState<CalenderForm>({
         name: '',
-        email: '',
+        description: '',
     });
 
-    const changeMemberForm = (key: keyof MemberForm, value: any) => {
-        setMemberForm({ ...memberForm, [key]: value });
+    const changeCalenderForm = (key: keyof CalenderForm, value: any) => {
+        setCalenderForm({ ...calenderForm, [key]: value });
     };
 
     const navigate = useNavigate();
@@ -28,15 +26,13 @@ export default function RegisterMember() {
 
     const registerMember = async (e: React.FormEvent) => {
         e.preventDefault();
-        const memberData: MemberRequest = {
-            memberId: memberForm.memberId,
-            password: memberForm.password,
-            name: memberForm.name,
-            email: memberForm.email,
+        const calenderData: CalenderRequest = {
+            name: calenderForm.name,
+            description: calenderForm.description,
         };
 
         try {
-            await axiosInstance.post('/member', memberData);
+            await axiosInstance.post('/calender', calenderData);
         } catch (err) {
             console.error('등록 실패', err);
         }
@@ -58,38 +54,9 @@ export default function RegisterMember() {
                 }}
             >
                 <Typography variant="h5" align="center" gutterBottom>
-                    회원가입
+                    새 캘린더 만들기
                 </Typography>
                 <Divider />
-                <Box display="flex" alignItems="center" gap={2}>
-                    <Box width="150px" textAlign="left">
-                        아이디
-                    </Box>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        value={memberForm.memberId}
-                        onChange={(e) => changeMemberForm('memberId', e.target.value)}
-                    />
-                </Box>
-                <Box display="flex" alignItems="center" gap={2}>
-                    <Box width="150px" textAlign="left">
-                        비밀번호
-                    </Box>
-                    <TextField
-                        fullWidth
-                        type="password"
-                        size="small"
-                        value={memberForm.password}
-                        onChange={(e) => changeMemberForm('password', e.target.value)}
-                    />
-                </Box>
-                <Box display="flex" alignItems="center" gap={2}>
-                    <Box width="150px" textAlign="left">
-                        비밀번호 확인
-                    </Box>
-                    <TextField fullWidth type="password" size="small" />
-                </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
                         이름
@@ -97,22 +64,21 @@ export default function RegisterMember() {
                     <TextField
                         fullWidth
                         size="small"
-                        value={memberForm.name}
-                        onChange={(e) => changeMemberForm('name', e.target.value)}
+                        value={calenderForm.name}
+                        onChange={(e) => changeCalenderForm('name', e.target.value)}
                     />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        이메일
+                        설명
                     </Box>
                     <TextField
                         fullWidth
                         size="small"
-                        value={memberForm.email}
-                        onChange={(e) => changeMemberForm('email', e.target.value)}
+                        value={calenderForm.description}
+                        onChange={(e) => changeCalenderForm('description', e.target.value)}
                     />
                 </Box>
-
                 <Box mt={2} display="flex" justifyContent="center" gap={2}>
                     <Button
                         type="submit"
@@ -121,7 +87,7 @@ export default function RegisterMember() {
                         color="info"
                         sx={{ width: '200px', fontSize: '16px', padding: '10px' }}
                     >
-                        가입하기
+                        캘린더만들기
                     </Button>
                 </Box>
             </form>

@@ -17,6 +17,7 @@ export interface ScheduleForm {
 
 export interface ScheduleRequest {
     title: string;
+    place: string;
     content: string;
     startDate: string; // YYYY-MM-DD
     startTime: string | null; // HH:mm

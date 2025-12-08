@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import axios from 'axios';
 import { Card, CardContent, Typography } from '@mui/material';
 import ScheduleDialog from './ScheduleDialog';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
+import Sidebar from '../components/Sidebar';
 
 type CustomDateClickArg = {
     date: Date;
@@ -32,7 +33,7 @@ export default function ScheduleList() {
     // 달력 범위 내 일정 가져오기
     const fetchSchedules = async (start: Date, end: Date) => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/schedules`, {
+            const response = await axiosInstance.get(`http://localhost:8080/api/schedules`, {
                 params: {
                     startDate: start.toISOString().split('T')[0],
                     endDate: end.toISOString().split('T')[0],
@@ -67,42 +68,52 @@ export default function ScheduleList() {
     };
 
     return (
-        <Card sx={{ width: '80%', margin: '30px auto', boxShadow: 3, borderRadius: 3, backgroundColor: '#fff' }}>
-            <CardContent>
-                <FullCalendar
-                    plugins={[dayGridPlugin, interactionPlugin]}
-                    initialView="dayGridMonth"
-                    locale="en"
-                    height="700px"
-                    headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,dayGridWeek,dayGridDay',
-                    }}
-                    eventContent={(arg) => <div style={{ cursor: 'pointer' }}>{arg.event.title}</div>}
-                    events={events}
-                    dateClick={handleDateClick}
-                    eventClick={(info) => {
-                        // 이벤트 클릭 → 다이얼로그 열기
-                        const clickedEvent = info.event;
-                        setSelectedSchedule({
-                            id: clickedEvent.id,
-                            title: clickedEvent.title,
-                            start: clickedEvent.startStr,
-                            end: clickedEvent.endStr,
-                            startTime: clickedEvent.start?.toISOString(),
-                            endTime: clickedEvent.end?.toISOString(),
-                            content: clickedEvent.extendedProps.content,
-                        });
-                        setOpen(true);
-                    }}
-                    datesSet={(arg) => {
-                        fetchSchedules(arg.start, arg.end);
-                    }}
-                />
+        <div style={{ display: 'flex' }}>
+            {/* 왼쪽 사이드바 */}
+            <Sidebar />
 
-                <ScheduleDialog open={open} onClose={handleClose} schedule={selectedSchedule} />
-            </CardContent>
-        </Card>
+            {/* 오른쪽 FullCalendar 영역 */}
+            <div style={{ flex: 1 }}>
+                <Card
+                    sx={{ width: '80%', margin: '30px auto', boxShadow: 3, borderRadius: 3, backgroundColor: '#fff' }}
+                >
+                    <CardContent>
+                        <FullCalendar
+                            plugins={[dayGridPlugin, interactionPlugin]}
+                            initialView="dayGridMonth"
+                            locale="en"
+                            height="700px"
+                            headerToolbar={{
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,dayGridWeek,dayGridDay',
+                            }}
+                            eventContent={(arg) => <div style={{ cursor: 'pointer' }}>{arg.event.title}</div>}
+                            events={events}
+                            dateClick={handleDateClick}
+                            eventClick={(info) => {
+                                // 이벤트 클릭 → 다이얼로그 열기
+                                const clickedEvent = info.event;
+                                setSelectedSchedule({
+                                    id: clickedEvent.id,
+                                    title: clickedEvent.title,
+                                    start: clickedEvent.startStr,
+                                    end: clickedEvent.endStr,
+                                    startTime: clickedEvent.start?.toISOString(),
+                                    endTime: clickedEvent.end?.toISOString(),
+                                    content: clickedEvent.extendedProps.content,
+                                });
+                                setOpen(true);
+                            }}
+                            datesSet={(arg) => {
+                                fetchSchedules(arg.start, arg.end);
+                            }}
+                        />
+
+                        <ScheduleDialog open={open} onClose={handleClose} schedule={selectedSchedule} />
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
 }

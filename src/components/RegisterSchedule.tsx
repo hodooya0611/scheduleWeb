@@ -11,16 +11,18 @@ import {
     InputLabel,
     FormControl,
     Checkbox,
+    IconButton,
 } from '@mui/material';
+import MapIcon from '@mui/icons-material/Map';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import axios from 'axios';
 import { ScheduleRequest, ScheduleForm } from '../types/schedule';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GoogleMap, useJsApiLoader, Libraries } from '@react-google-maps/api';
+import axiosInstance from '../api/axiosInstance';
 
 const LIBRARIES: Libraries = ['places'];
 
@@ -45,6 +47,10 @@ export default function RegisterSchedule() {
         customAlarmDate: dayjs(),
         customAlarmTime: dayjs(),
     });
+
+    const [showMap, setShowMap] = useState(false);
+    // const mapRef = useRef(null);
+    // const inputRef = useRef(null);
 
     const changeScheduleForm = (key: keyof ScheduleForm, value: any) => {
         setScheduleForm({ ...scheduleForm, [key]: value });
@@ -90,8 +96,9 @@ export default function RegisterSchedule() {
 
     useEffect(() => {
         if (mode === 'view' && scheduleId) {
-            axios
-                .get(`http://localhost:8080/api/schedules/view/${scheduleId}`)
+            const token = localStorage.getItem('token');
+            axiosInstance
+                .get(`/schedules/view/${scheduleId}`)
                 .then((res) => {
                     const data = res.data;
                     setScheduleForm({
@@ -117,6 +124,7 @@ export default function RegisterSchedule() {
         e.preventDefault();
         const scheduleData: ScheduleRequest = {
             title: scheduleForm.title,
+            place: scheduleForm.place,
             content: scheduleForm.content,
             startDate: scheduleForm.startDate?.format('YYYY-MM-DD') || '',
             startTime: scheduleForm.allDay ? '' : scheduleForm.startTime?.format('HH:mm') || '',
@@ -133,9 +141,9 @@ export default function RegisterSchedule() {
 
         try {
             if (mode === 'view' && scheduleId) {
-                await axios.post(`http://localhost:8080/api/schedules/update/${scheduleId}`, scheduleData);
+                await axiosInstance.post(`/schedules/update/${scheduleId}`, scheduleData);
             } else {
-                await axios.post('http://localhost:8080/api/schedules', scheduleData);
+                await axiosInstance.post('/schedules', scheduleData);
             }
             navigate('/');
         } catch (err) {
@@ -170,24 +178,33 @@ export default function RegisterSchedule() {
                 />
 
                 {/* 장소 검색 */}
-                <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="장소 검색"
-                    style={{ width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' }}
-                    value={scheduleForm.place}
-                    onChange={(e) => changeScheduleForm('place', e.target.value)}
-                />
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="장소 검색"
+                        style={{ width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' }}
+                        value={scheduleForm.place}
+                        onChange={(e) => changeScheduleForm('place', e.target.value)}
+                    />
+                    <IconButton onClick={() => setShowMap((prev) => !prev)}>
+                        <MapIcon color={showMap ? 'primary' : 'action'} />
+                    </IconButton>
+                </div>
 
                 {/* 지도 */}
-                <GoogleMap
-                    mapContainerStyle={{ width: '100%', height: '400px' }}
-                    center={center}
-                    zoom={16}
-                    onLoad={(map) => {
-                        mapRef.current = map;
-                    }}
-                />
+                {showMap && (
+                    <div style={{ marginTop: '8px' }}>
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '400px' }}
+                            center={center}
+                            zoom={16}
+                            onLoad={(map) => {
+                                mapRef.current = map;
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* 날짜/시간/전체 일정 */}
                 <Box display="flex" gap={2} mt={2} alignItems="center">
