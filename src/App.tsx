@@ -8,6 +8,7 @@ import ResetPassword from './pages/ResetPassword';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import CreateCalender from './pages/CreateCalender';
+import SettingCalender from './pages/SettingCalender';
 
 export default function App() {
     return (
@@ -30,6 +31,8 @@ export default function App() {
                     <Route path="/reset-password" element={<ResetPassword />} />
 
                     <Route path="/CreateCalender" element={<CreateCalender />} />
+
+                    <Route path="/SettingCalender" element={<SettingCalender />} />
                 </Routes>
             </div>
         </Router>

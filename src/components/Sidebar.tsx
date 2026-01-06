@@ -1,5 +1,7 @@
-import { Button, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Button, Typography, Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 type SidebarProps = {
     calendars: any[]; // 나중에 Calendar[]로 바꾸면 됨
@@ -7,6 +9,19 @@ type SidebarProps = {
 
 export default function Sidebar({ calendars }: SidebarProps) {
     const navigate = useNavigate();
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedCalendar, setSelectedCalendar] = useState(null);
+
+    const handleOpenMenu = (event: any, cal: any) => {
+        setAnchorEl(event.currentTarget); // 메뉴 위치
+        setSelectedCalendar(cal); // 어떤 캘린더인지
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+        setSelectedCalendar(null);
+    };
 
     return (
         <div
@@ -24,11 +39,32 @@ export default function Sidebar({ calendars }: SidebarProps) {
 
             {/* 👇 캘린더 목록 */}
             {calendars.map((cal) => (
-                
-                <Typography key={cal.id} sx={{ mb: 1 }}>
-                    {cal.name}
-                </Typography>
+                <Box
+                    key={cal.id}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1,
+                    }}
+                >
+                    <Typography>{cal.name}</Typography>
+
+                    <IconButton size="small" onClick={(e) => handleOpenMenu(e, cal)}>
+                        <MoreVertIcon />
+                    </IconButton>
+                </Box>
             ))}
+
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                <MenuItem
+                    onClick={() => {
+                        navigate('/SettingCalender');
+                    }}
+                >
+                    설정 및 공유
+                </MenuItem>
+            </Menu>
 
             <Button variant="contained" color="primary" fullWidth onClick={() => navigate('/CreateCalender')}>
                 + 캘린더 추가하기
