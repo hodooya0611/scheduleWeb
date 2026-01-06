@@ -123,6 +123,7 @@ export default function RegisterSchedule() {
     const registerOrUpdateSchedule = async (e: React.FormEvent) => {
         e.preventDefault();
         const scheduleData: ScheduleRequest = {
+            calendarId: scheduleForm.calendarId,
             title: scheduleForm.title,
             place: scheduleForm.place,
             content: scheduleForm.content,

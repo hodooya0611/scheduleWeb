@@ -1,10 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ResponsiveAppBar from './components/ResponsiveAppBar';
-import ScheduleList from './components/ScheduleList';
-import RegisterSchedule from './components/RegisterSchedule';
-import RegisterMember from './components/RegisterMember';
-import Login from './components/Login';
+import RegisterSchedule from './pages/RegisterSchedule';
+import RegisterMember from './pages/RegisterMember';
+import FindPassword from './pages/FindPassword';
+import ResetPassword from './pages/ResetPassword';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import CreateCalender from './pages/CreateCalender';
 
 export default function App() {
     return (
@@ -14,15 +17,19 @@ export default function App() {
 
             <div style={{ padding: '20px' }}>
                 <Routes>
-                    {/* 기본 화면: 달력*/}
-                    <Route path="/" element={<ScheduleList />} />
-
                     <Route path="/login" element={<Login />} />
+
+                    <Route path="/" element={<Home />} />
 
                     <Route path="/registerMember" element={<RegisterMember />} />
 
-                    {/* 등록 화면: 버튼 클릭 시 이동 */}
                     <Route path="/register" element={<RegisterSchedule />} />
+
+                    <Route path="/find-password" element={<FindPassword />} />
+
+                    <Route path="/reset-password" element={<ResetPassword />} />
+
+                    <Route path="/CreateCalender" element={<CreateCalender />} />
                 </Routes>
             </div>
         </Router>

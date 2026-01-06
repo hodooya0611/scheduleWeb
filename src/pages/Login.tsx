@@ -3,8 +3,9 @@ import { TextField, Box, Button, Typography, Link, Paper } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import axios from 'axios';
-import { LoginRequest, LoginResponse, LoginForm } from '../types/login';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { LoginRequest, LoginForm } from '../types/login';
+import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function Login() {
     const [loginForm, setLoginForm] = useState<LoginForm>({
@@ -17,10 +18,8 @@ export default function Login() {
     };
 
     const navigate = useNavigate();
-    const location = useLocation();
 
-    const login = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const login = async () => {
         const loginData: LoginRequest = {
             memberId: loginForm.memberId,
             password: loginForm.password,
@@ -31,7 +30,6 @@ export default function Login() {
 
             const token = response.data.token;
 
-            // 토큰 저장 (브라우저 새로고침해도 유지)
             localStorage.setItem('token', token);
 
             navigate(`/`);
@@ -46,17 +44,19 @@ export default function Login() {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <form
-                onSubmit={login}
-                style={{
-                    width: '80%', // 화면 너비의 70%
-                    maxWidth: 800, // 너무 커지지 않게 제한
-                    minWidth: 400, // 너무 작아지면 보기 힘듦
-                    margin: '0 auto', // 좌우 가운데 정렬
-                    marginTop: '32px', // 위쪽 여백
+            <Box
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.preventDefault();
+                }}
+                sx={{
+                    width: '80%',
+                    maxWidth: 800,
+                    minWidth: 400,
+                    margin: '0 auto',
+                    marginTop: '32px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '16px', // 요소 사이 간격
+                    gap: '16px',
                 }}
             >
                 <Paper elevation={3} sx={{ p: 4, width: 400, borderRadius: 3 }}>
@@ -80,10 +80,16 @@ export default function Login() {
                     />
 
                     <Box mt={2} display="flex" flexDirection="column" gap={2}>
-                        <Button type="submit" variant="contained" color="primary" fullWidth>
+                        <Button onClick={login} variant="contained" color="primary" fullWidth>
                             로그인
                         </Button>
-                        <Button type="button" variant="outlined" color="secondary" fullWidth>
+                        <Button
+                            type="button"
+                            variant="outlined"
+                            color="secondary"
+                            fullWidth
+                            onClick={() => navigate('/registerMember')}
+                        >
                             회원가입
                         </Button>
                     </Box>
@@ -94,12 +100,12 @@ export default function Login() {
                             아이디 찾기
                         </Link>
                         |
-                        <Link href="#" underline="hover" sx={{ mx: 1 }}>
+                        <Link component={RouterLink} to="/find-password" underline="hover" sx={{ mx: 1 }}>
                             비밀번호 찾기
                         </Link>
                     </Box>
                 </Paper>
-            </form>
+            </Box>
         </LocalizationProvider>
     );
 }
