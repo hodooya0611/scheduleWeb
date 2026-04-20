@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import CreateCalender from './pages/CreateCalender';
 import SettingCalender from './pages/SettingCalender';
+import AcceptInvitation from './pages/AcceptInvitation'; 
 
 export default function App() {
     return (
@@ -32,7 +33,9 @@ export default function App() {
 
                     <Route path="/CreateCalender" element={<CreateCalender />} />
 
-                    <Route path="/SettingCalender" element={<SettingCalender />} />
+                    <Route path="/SettingCalender/:calendarId" element={<SettingCalender />} />
+
+                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
                 </Routes>
             </div>
         </Router>

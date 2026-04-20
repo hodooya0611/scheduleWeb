@@ -4,16 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 type SidebarProps = {
-    calendars: any[]; // 나중에 Calendar[]로 바꾸면 됨
+    calendars: Calendar[];
 };
+
+interface Calendar {
+    id: number;
+    name: string;
+    isDefault: boolean;
+}
 
 export default function Sidebar({ calendars }: SidebarProps) {
     const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedCalendar, setSelectedCalendar] = useState(null);
+    const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
 
     const handleOpenMenu = (event: any, cal: any) => {
+        console.log('선택한 캘린더:', cal);
         setAnchorEl(event.currentTarget); // 메뉴 위치
         setSelectedCalendar(cal); // 어떤 캘린더인지
     };
@@ -59,7 +66,8 @@ export default function Sidebar({ calendars }: SidebarProps) {
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
                 <MenuItem
                     onClick={() => {
-                        navigate('/SettingCalender');
+                        navigate(`/SettingCalender/${selectedCalendar?.id}`);
+                        handleCloseMenu();
                     }}
                 >
                     설정 및 공유

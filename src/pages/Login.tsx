@@ -2,10 +2,18 @@ import React, { useState } from 'react';
 import { TextField, Box, Button, Typography, Link, Paper } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { LoginRequest, LoginForm } from '../types/login';
 import { useNavigate } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
+import AlertDialog from '../components/AlertDialog';
+import { Help } from '@mui/icons-material';
+
+interface Props {
+    open: boolean;
+    onClose: () => void;
+    calendarId: string;
+}
 
 export default function Login() {
     const [loginForm, setLoginForm] = useState<LoginForm>({
@@ -19,23 +27,57 @@ export default function Login() {
 
     const navigate = useNavigate();
 
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const [idError, setIdError] = useState('');
+
+    const [passwordError, setPasswordError] = useState('');
+
+    const check = () => {
+        if (loginForm.memberId === '') {
+            setIdError('Idは必ず入力してください');
+            return false;
+        }
+
+        if (loginForm.password === '') {
+            setPasswordError('パスワードは必ず入力してください');
+            return false;
+        }
+        return true;
+    };
+
     const login = async () => {
+        const checkFlg = check();
+
+        if (!checkFlg) {
+            return;
+        }
+
         const loginData: LoginRequest = {
             memberId: loginForm.memberId,
             password: loginForm.password,
         };
 
         try {
-            const response = await axios.post(`http://localhost:8080/api/auth/login`, loginData);
+            const response = await axiosInstance.post(`http://localhost:8080/api/auth/login`, loginData);
 
             const token = response.data.token;
 
             localStorage.setItem('token', token);
 
+            const pendingToken = localStorage.getItem('pendingInviteToken');
+
+            if (pendingToken) {
+                localStorage.removeItem('pendingInviteToken');
+                await axiosInstance.post('/invitation/invite/accept', { token: pendingToken });
+            }
             navigate(`/`);
         } catch (err: any) {
-            if (err.response?.status === 401 || err.response?.status === 403) {
-                alert('아이디 또는 비밀번호가 틀렸습니다.');
+            if (err.response?.status === 401) {
+                setErrorMessage(err.response.data.message);
+                setOpenAlertDialog(true);
             } else {
                 alert('로그인 중 오류가 발생했습니다.');
             }
@@ -61,27 +103,37 @@ export default function Login() {
             >
                 <Paper elevation={3} sx={{ p: 4, width: 400, borderRadius: 3 }}>
                     <Typography variant="h5" align="center" gutterBottom>
-                        로그인
+                        ログイン
                     </Typography>
                     <TextField
-                        label="아이디"
+                        label="Id"
                         fullWidth
                         margin="normal"
                         value={loginForm.memberId}
-                        onChange={(e) => changeLoginForm('memberId', e.target.value)}
+                        error={idError !== ''}
+                        helperText={idError}
+                        onChange={(e) => {
+                            setIdError('');
+                            changeLoginForm('memberId', e.target.value);
+                        }}
                     />
                     <TextField
-                        label="비밀번호"
+                        label="パスワード"
                         type="password"
                         fullWidth
                         margin="normal"
                         value={loginForm.password}
-                        onChange={(e) => changeLoginForm('password', e.target.value)}
+                        error={passwordError !== ''}
+                        helperText={passwordError}
+                        onChange={(e) => {
+                            setPasswordError('');
+                            changeLoginForm('password', e.target.value);
+                        }}
                     />
 
                     <Box mt={2} display="flex" flexDirection="column" gap={2}>
                         <Button onClick={login} variant="contained" color="primary" fullWidth>
-                            로그인
+                            ログイン
                         </Button>
                         <Button
                             type="button"
@@ -90,22 +142,22 @@ export default function Login() {
                             fullWidth
                             onClick={() => navigate('/registerMember')}
                         >
-                            회원가입
+                            新規登録
                         </Button>
                     </Box>
 
-                    {/* 비밀번호 / 아이디 찾기 */}
                     <Box mt={2} textAlign="center">
                         <Link href="#" underline="hover" sx={{ mx: 1 }}>
-                            아이디 찾기
+                            IDをお忘れの方
                         </Link>
                         |
                         <Link component={RouterLink} to="/find-password" underline="hover" sx={{ mx: 1 }}>
-                            비밀번호 찾기
+                            パスワードをお忘れの方
                         </Link>
                     </Box>
                 </Paper>
             </Box>
+            <AlertDialog open={openAlertDialog} onClose={() => setOpenAlertDialog(false)} errorMessage={errorMessage} />
         </LocalizationProvider>
     );
 }

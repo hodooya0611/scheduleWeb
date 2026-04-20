@@ -7,8 +7,11 @@ import axiosInstance from '../api/axiosInstance';
 import { CalenderRequest, CalenderResponse, CalenderForm } from '../types/calender';
 import { useNavigate, useLocation } from 'react-router-dom';
 import InvitationDialog from '../components/InvitationDialog';
+import { useParams } from 'react-router-dom';
 
 export default function CreateCalender() {
+    const { calendarId } = useParams<{ calendarId: string }>();
+
     const [calenderForm, setCalenderForm] = useState<CalenderForm>({
         name: '',
         description: '',
@@ -40,6 +43,10 @@ export default function CreateCalender() {
     };
 
     const [openInviteDialog, setOpenInviteDialog] = useState(false);
+
+    if (!calendarId) {
+        return <div>잘못된 접근입니다</div>;
+    }
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -103,7 +110,11 @@ export default function CreateCalender() {
                     </Button>
                 </Box>
             </form>
-            <InvitationDialog open={openInviteDialog} onClose={() => setOpenInviteDialog(false)} />
+            <InvitationDialog
+                open={openInviteDialog}
+                calendarId={calendarId}
+                onClose={() => setOpenInviteDialog(false)}
+            />
         </LocalizationProvider>
     );
 }
