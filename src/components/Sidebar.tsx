@@ -5,6 +5,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 type SidebarProps = {
     calendars: Calendar[];
+    sharedCalendars: Calendar[];
 };
 
 interface Calendar {
@@ -13,7 +14,7 @@ interface Calendar {
     isDefault: boolean;
 }
 
-export default function Sidebar({ calendars }: SidebarProps) {
+export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
     const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -58,6 +59,28 @@ export default function Sidebar({ calendars }: SidebarProps) {
                     <Typography>{cal.name}</Typography>
 
                     <IconButton size="small" onClick={(e) => handleOpenMenu(e, cal)}>
+                        <MoreVertIcon />
+                    </IconButton>
+                </Box>
+            ))}
+
+            {/* 공유 캘린더 목록 */}
+            <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>
+                共有カレンダー
+            </Typography>
+
+            {sharedCalendars.map((sharedCalendars) => (
+                <Box
+                    key={sharedCalendars.id}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1,
+                    }}
+                >
+                    <Typography>{sharedCalendars.name}</Typography>
+                    <IconButton size="small" onClick={(e) => handleOpenMenu(e, sharedCalendars)}>
                         <MoreVertIcon />
                     </IconButton>
                 </Box>

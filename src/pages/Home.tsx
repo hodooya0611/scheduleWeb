@@ -6,6 +6,7 @@ import axiosInstance from '../api/axiosInstance';
 const Home = () => {
     const [calendars, setCalendars] = useState([]);
     const [schedules, setSchedules] = useState([]);
+    const [sharedCalendars, setSharedCalendars] = useState([]);
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -13,6 +14,7 @@ const Home = () => {
                 const res = await axiosInstance.get(`http://localhost:8080/api/home`);
                 console.log('레스폰스 출력', res);
                 setCalendars(res.data.calendarList);
+                setSharedCalendars(res.data.sharedCalendarList);
                 setSchedules(res.data.scheduleList);
             } catch (e) {
                 console.error(e);
@@ -24,7 +26,7 @@ const Home = () => {
 
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
-            <Sidebar calendars={calendars} />
+            <Sidebar calendars={calendars} sharedCalendars={sharedCalendars} />
             <div style={{ flex: 1, overflow: 'auto' }}>
                 <ScheduleList schedules={schedules} />
             </div>

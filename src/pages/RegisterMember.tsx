@@ -23,7 +23,7 @@ export default function RegisterMember() {
     const location = useLocation();
 
     const clickCancel = () => {
-        navigate('/'); // 홈으로 이동
+        navigate('/login ');
     };
 
     const registerMember = async (e: React.FormEvent) => {
@@ -58,12 +58,12 @@ export default function RegisterMember() {
                 }}
             >
                 <Typography variant="h5" align="center" gutterBottom>
-                    회원가입
+                    新規登録
                 </Typography>
                 <Divider />
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        아이디
+                        Id
                     </Box>
                     <TextField
                         fullWidth
@@ -74,7 +74,7 @@ export default function RegisterMember() {
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        비밀번호
+                        パスワード
                     </Box>
                     <TextField
                         fullWidth
@@ -86,13 +86,13 @@ export default function RegisterMember() {
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        비밀번호 확인
+                        パスワード（確認）
                     </Box>
                     <TextField fullWidth type="password" size="small" />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        이름
+                        名前
                     </Box>
                     <TextField
                         fullWidth
@@ -103,7 +103,7 @@ export default function RegisterMember() {
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
-                        이메일
+                        メールアドレス
                     </Box>
                     <TextField
                         fullWidth
@@ -121,7 +121,17 @@ export default function RegisterMember() {
                         color="info"
                         sx={{ width: '200px', fontSize: '16px', padding: '10px' }}
                     >
-                        가입하기
+                        登録
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="contained"
+                        size="large"
+                        color="info"
+                        sx={{ width: '200px', fontSize: '16px', padding: '10px' }}
+                        onClick={clickCancel}
+                    >
+                        取消
                     </Button>
                 </Box>
             </form>
