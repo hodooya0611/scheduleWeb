@@ -18,33 +18,48 @@ type CustomDateClickArg = {
 
 type ScheduleListProps = {
     schedules: any[];
+    sharedSchedules: any[];
+    selectedCalendar: Calendar | null;
 };
 
-export default function ScheduleList({ schedules }: ScheduleListProps) {
+interface Calendar {
+    id: number;
+    name: string;
+    isDefault: boolean;
+}
+
+export default function ScheduleList({ schedules, sharedSchedules, selectedCalendar }: ScheduleListProps) {
     const [events, setEvents] = useState<any[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedSchedule, setSelectedSchedule] = useState<any | null>(null);
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        if (!schedules) return;
-
-        const calendarEvents = schedules.map((schedule: any) => ({
+        const myEvents = (schedules || []).map((schedule: any) => ({
             id: schedule.id,
             title: schedule.title,
             start: schedule.startDate,
             end: schedule.endDate,
+            color: 'pink',
         }));
 
-        setEvents(calendarEvents);
-    }, [schedules]);
+        const sharedEvents = (sharedSchedules || []).map((schedule: any) => ({
+            id: schedule.id,
+            title: schedule.title,
+            start: schedule.startDate,
+            end: schedule.endDate,
+            color: 'green',
+        }));
+
+        setEvents([...myEvents, ...sharedEvents]);
+    }, [schedules, sharedSchedules]);
 
     const navigate = useNavigate();
 
     const handleDateClick = (info: any) => {
         const clickedDate = info.dateStr; // YYYY-MM-DD
         // 스케줄 등록 페이지로 이동, 쿼리스트링으로 날짜 전달 가능
-        navigate(`/register?date=${clickedDate}`);
+        navigate(`/register?date=${clickedDate}&calendarId=${selectedCalendar?.id}`);
     };
 
     const handleClose = () => setOpen(false);

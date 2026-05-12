@@ -6,6 +6,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 type SidebarProps = {
     calendars: Calendar[];
     sharedCalendars: Calendar[];
+    onCalendarClick: (calendar: Calendar) => void;
 };
 
 interface Calendar {
@@ -14,7 +15,7 @@ interface Calendar {
     isDefault: boolean;
 }
 
-export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
+export default function Sidebar({ calendars, sharedCalendars, onCalendarClick }: SidebarProps) {
     const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -41,8 +42,8 @@ export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
                 boxSizing: 'border-box',
             }}
         >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                캘린더
+            <Typography variant="h6" sx={{ mb: 2, color: '#d94040', fontWeight: 500 }}>
+                My Calendars
             </Typography>
 
             {/* 👇 캘린더 목록 */}
@@ -56,7 +57,9 @@ export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
                         mb: 1,
                     }}
                 >
-                    <Typography>{cal.name}</Typography>
+                    <Typography onClick={() => onCalendarClick(cal)} sx={{ cursor: 'pointer' }}>
+                        {cal.name}
+                    </Typography>
 
                     <IconButton size="small" onClick={(e) => handleOpenMenu(e, cal)}>
                         <MoreVertIcon />
@@ -65,7 +68,7 @@ export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
             ))}
 
             {/* 공유 캘린더 목록 */}
-            <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2, mt: 2, color: '#d94040', fontWeight: 500 }}>
                 共有カレンダー
             </Typography>
 
@@ -79,7 +82,9 @@ export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
                         mb: 1,
                     }}
                 >
-                    <Typography>{sharedCalendars.name}</Typography>
+                    <Typography onClick={() => onCalendarClick(sharedCalendars)} sx={{ cursor: 'pointer' }}>
+                        {sharedCalendars.name}
+                    </Typography>
                     <IconButton size="small" onClick={(e) => handleOpenMenu(e, sharedCalendars)}>
                         <MoreVertIcon />
                     </IconButton>
@@ -97,8 +102,20 @@ export default function Sidebar({ calendars, sharedCalendars }: SidebarProps) {
                 </MenuItem>
             </Menu>
 
-            <Button variant="contained" color="primary" fullWidth onClick={() => navigate('/CreateCalender')}>
-                + 캘린더 추가하기
+            <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/CreateCalender')}
+                sx={{
+                    border: '0.5px solid #d94040',
+                    backgroundColor: 'white',
+                    color: '#d94040',
+                    boxShadow: 'none',
+                    textTransform: 'none',
+                    '&:hover': { backgroundColor: '#fdeaea', boxShadow: 'none' },
+                }}
+            >
+                + Add Calendar
             </Button>
         </div>
     );

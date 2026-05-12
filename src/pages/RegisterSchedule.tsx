@@ -32,6 +32,7 @@ export default function RegisterSchedule() {
     const searchParams = new URLSearchParams(location.search);
     const scheduleId = searchParams.get('id');
     const mode = searchParams.get('mode') || 'create';
+    const calendarId = searchParams.get('calendarId');
 
     const [scheduleForm, setScheduleForm] = useState<ScheduleForm>({
         title: '',
@@ -46,6 +47,7 @@ export default function RegisterSchedule() {
         alarmTimeOption: '5분전',
         customAlarmDate: dayjs(),
         customAlarmTime: dayjs(),
+        calendarId: calendarId ? Number(calendarId) : null,
     });
 
     const [showMap, setShowMap] = useState(false);
@@ -146,6 +148,7 @@ export default function RegisterSchedule() {
             } else {
                 await axiosInstance.post('/schedules', scheduleData);
             }
+            console.log('머지머지머지머밈저지');
             navigate('/');
         } catch (err) {
             console.error('등록 실패', err);

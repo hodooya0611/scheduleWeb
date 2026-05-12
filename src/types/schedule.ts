@@ -1,7 +1,7 @@
 import { Dayjs } from 'dayjs';
 
 export interface ScheduleForm {
-    calendarId?: number;
+    calendarId?: number | null;
     title: string;
     content: string;
     place: string;
@@ -17,7 +17,7 @@ export interface ScheduleForm {
 }
 
 export interface ScheduleRequest {
-    calendarId?: number;
+    calendarId?: number | null;
     title: string;
     place: string;
     content: string;

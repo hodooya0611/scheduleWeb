@@ -71,7 +71,11 @@ export default function Login() {
 
             if (pendingToken) {
                 localStorage.removeItem('pendingInviteToken');
-                await axiosInstance.post('/invitation/invite/accept', { token: pendingToken });
+                await axiosInstance.post(
+                    '/invitation/invite/accept',
+                    { token: pendingToken },
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
             }
             navigate(`/`);
         } catch (err: any) {

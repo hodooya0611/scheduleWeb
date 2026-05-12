@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Avatar, Menu, MenuItem, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import AdbIcon from '@mui/icons-material/Adb';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+
 import { Link } from 'react-router-dom';
 
 export default function Header() {
@@ -27,23 +28,25 @@ export default function Header() {
     };
 
     return (
-        <AppBar position="static" color="primary">
+        <AppBar position="static" elevation={0} sx={{ 
+        backgroundColor: '#ffffff',
+        borderBottom: '0.5px solid #d94040',
+    }}>
             <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 {/* 왼쪽 로고나 이름 */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AdbIcon />
+                   <CalendarMonthIcon sx={{ color: '#d94040', fontSize: 20 }} />
                     <Typography
                         variant="h6"
                         component={Link}
                         to="/"
                         sx={{
                             textDecoration: 'none',
-                            color: 'inherit',
-                            fontWeight: 700,
-                            fontFamily: 'monospace',
+                            color:'#d94040',
+                            fontWeight: 500,
                         }}
                     >
-                        캘린더
+                        Calendar
                     </Typography>
                 </Box>
 
