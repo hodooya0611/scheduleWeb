@@ -33,14 +33,15 @@ export default function RegisterSchedule() {
     const scheduleId = searchParams.get('id');
     const mode = searchParams.get('mode') || 'create';
     const calendarId = searchParams.get('calendarId');
+    const date = searchParams.get('date');
 
     const [scheduleForm, setScheduleForm] = useState<ScheduleForm>({
         title: '',
         place: '',
         content: '',
-        startDate: dayjs(),
+        startDate: date ? dayjs(date) : dayjs(),
         startTime: dayjs(),
-        endDate: dayjs(),
+        endDate: date ? dayjs(date) : dayjs(),
         endTime: dayjs(),
         allDay: false,
         alarmEnabled: false,

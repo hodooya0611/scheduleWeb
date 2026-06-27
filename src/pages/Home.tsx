@@ -67,6 +67,7 @@ const Home = () => {
                     schedules={schedules}
                     sharedSchedules={sharedSchedules}
                     selectedCalendar={selectedCalendar}
+                    onDeleted={fetchHomeData}
                 />
             </div>
         </div>

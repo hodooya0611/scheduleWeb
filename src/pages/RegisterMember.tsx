@@ -1,42 +1,60 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { TextField, Box, Button, Typography, Divider } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { MESSAGES } from '../constants/messages';
+import {
+    Dialog,
+    TextField,
+    Box,
+    Button,
+    Typography,
+    Divider,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+} from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import axiosInstance from '../api/axiosInstance';
 import { MemberRequest, MemberResponse, MemberForm } from '../types/member';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function RegisterMember() {
-    const [memberForm, setMemberForm] = useState<MemberForm>({
-        memberId: '',
-        password: '',
-        name: '',
-        email: '',
+const schema = z
+    .object({
+        memberId: z.string().min(1, MESSAGES.REQUIRED_ID),
+        password: z.string().min(6, MESSAGES.PASSWORD_MIN),
+        confirmPassword: z.string(),
+        name: z.string().min(1, MESSAGES.REQUIRED_NAME),
+        email: z.string().email(MESSAGES.EMAIL_INVALID),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: MESSAGES.PASSWORD_MISMATCH,
+        path: ['confirmPassword'],
     });
 
-    const changeMemberForm = (key: keyof MemberForm, value: any) => {
-        setMemberForm({ ...memberForm, [key]: value });
-    };
+export default function RegisterMember() {
+    const [successOpen, setSuccessOpen] = useState(false);
 
     const navigate = useNavigate();
-    const location = useLocation();
 
     const clickCancel = () => {
-        navigate('/login ');
+        navigate('/login');
     };
 
-    const registerMember = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const memberData: MemberRequest = {
-            memberId: memberForm.memberId,
-            password: memberForm.password,
-            name: memberForm.name,
-            email: memberForm.email,
-        };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(schema),
+    });
 
+    const registerMember = async (data: any) => {
         try {
-            await axiosInstance.post('/member', memberData);
+            await axiosInstance.post('/member', data);
+            setSuccessOpen(true);
         } catch (err) {
             console.error('등록 실패', err);
         }
@@ -45,7 +63,7 @@ export default function RegisterMember() {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <form
-                onSubmit={registerMember}
+                onSubmit={handleSubmit(registerMember)}
                 style={{
                     width: '80%', // 화면 너비의 70%
                     maxWidth: 800, // 너무 커지지 않게 제한
@@ -65,52 +83,31 @@ export default function RegisterMember() {
                     <Box width="150px" textAlign="left">
                         Id
                     </Box>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        value={memberForm.memberId}
-                        onChange={(e) => changeMemberForm('memberId', e.target.value)}
-                    />
+                    <TextField fullWidth size="small" {...register('memberId')} />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
                         パスワード
                     </Box>
-                    <TextField
-                        fullWidth
-                        type="password"
-                        size="small"
-                        value={memberForm.password}
-                        onChange={(e) => changeMemberForm('password', e.target.value)}
-                    />
+                    <TextField fullWidth type="password" size="small" {...register('password')} />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
                         パスワード（確認）
                     </Box>
-                    <TextField fullWidth type="password" size="small" />
+                    <TextField fullWidth type="password" size="small" {...register('confirmPassword')} />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
                         名前
                     </Box>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        value={memberForm.name}
-                        onChange={(e) => changeMemberForm('name', e.target.value)}
-                    />
+                    <TextField fullWidth size="small" {...register('name')} />
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box width="150px" textAlign="left">
                         メールアドレス
                     </Box>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        value={memberForm.email}
-                        onChange={(e) => changeMemberForm('email', e.target.value)}
-                    />
+                    <TextField fullWidth size="small" {...register('email')} />
                 </Box>
 
                 <Box mt={2} display="flex" justifyContent="center" gap={2}>
@@ -135,6 +132,13 @@ export default function RegisterMember() {
                     </Button>
                 </Box>
             </form>
+            <Dialog open={successOpen}>
+                <DialogTitle>회원가입 완료</DialogTitle>
+                <DialogContent>성공적으로 가입되었습니다. 로그인해주세요.</DialogContent>
+                <DialogActions>
+                    <Button onClick={() => navigate('/login')} variant="contained"></Button>
+                </DialogActions>
+            </Dialog>
         </LocalizationProvider>
     );
 }

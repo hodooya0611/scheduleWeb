@@ -20,6 +20,7 @@ type ScheduleListProps = {
     schedules: any[];
     sharedSchedules: any[];
     selectedCalendar: Calendar | null;
+    onDeleted?: () => void;
 };
 
 interface Calendar {
@@ -28,7 +29,7 @@ interface Calendar {
     isDefault: boolean;
 }
 
-export default function ScheduleList({ schedules, sharedSchedules, selectedCalendar }: ScheduleListProps) {
+export default function ScheduleList({ schedules, sharedSchedules, selectedCalendar, onDeleted }: ScheduleListProps) {
     const [events, setEvents] = useState<any[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedSchedule, setSelectedSchedule] = useState<any | null>(null);
@@ -99,7 +100,7 @@ export default function ScheduleList({ schedules, sharedSchedules, selectedCalen
                     setOpen(true);
                 }}
             />
-            <ScheduleDialog open={open} onClose={handleClose} schedule={selectedSchedule} />
+            <ScheduleDialog open={open} onClose={handleClose} schedule={selectedSchedule} onDeleted={onDeleted} />
         </div>
     );
 }
